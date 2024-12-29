@@ -1,73 +1,44 @@
-import { useEvent } from 'expo';
-import ExpoApkInstaller, { ExpoApkInstallerView } from 'expo-apk-installer';
-import { Button, SafeAreaView, ScrollView, Text, View } from 'react-native';
+import * as ExpoApkInstaller from "expo-apk-installer";
+import * as FileSystem from "expo-file-system";
+import { Button, View } from "react-native";
 
 export default function App() {
-  const onChangePayload = useEvent(ExpoApkInstaller, 'onChange');
+  const downloadApk = async (url: string) => {
+    console.log("Starting APK download from:", url);
+
+    const downloadResumable = FileSystem.createDownloadResumable(
+      url,
+      FileSystem.cacheDirectory + "movo-update.apk"
+    );
+
+    try {
+      const result = await downloadResumable.downloadAsync();
+      console.log("Finished downloading to ", result?.uri);
+      return result?.uri;
+    } catch (error) {
+      console.error("Error downloading APK:", error);
+      return null;
+    }
+  };
+
+  const handleInstall = async () => {
+    try {
+      const uri = await downloadApk(
+        "https://github.com/circulosmeos/triops.apk/releases/download/v1.6/triops.apk"
+      );
+
+      if (!uri)
+        throw new Error("APK download failed. Check the logs for more info.");
+
+      await ExpoApkInstaller.install(uri);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.container}>
-        <Text style={styles.header}>Module API Example</Text>
-        <Group name="Constants">
-          <Text>{ExpoApkInstaller.PI}</Text>
-        </Group>
-        <Group name="Functions">
-          <Text>{ExpoApkInstaller.hello()}</Text>
-        </Group>
-        <Group name="Async functions">
-          <Button
-            title="Set value"
-            onPress={async () => {
-              await ExpoApkInstaller.setValueAsync('Hello from JS!');
-            }}
-          />
-        </Group>
-        <Group name="Events">
-          <Text>{onChangePayload?.value}</Text>
-        </Group>
-        <Group name="Views">
-          <ExpoApkInstallerView
-            url="https://www.example.com"
-            onLoad={({ nativeEvent: { url } }) => console.log(`Loaded: ${url}`)}
-            style={styles.view}
-          />
-        </Group>
-      </ScrollView>
-    </SafeAreaView>
-  );
-}
-
-function Group(props: { name: string; children: React.ReactNode }) {
-  return (
-    <View style={styles.group}>
-      <Text style={styles.groupHeader}>{props.name}</Text>
-      {props.children}
+    <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+      <Button title="Download & Install" onPress={handleInstall} />
     </View>
   );
 }
-
-const styles = {
-  header: {
-    fontSize: 30,
-    margin: 20,
-  },
-  groupHeader: {
-    fontSize: 20,
-    marginBottom: 20,
-  },
-  group: {
-    margin: 20,
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 20,
-  },
-  container: {
-    flex: 1,
-    backgroundColor: '#eee',
-  },
-  view: {
-    flex: 1,
-    height: 200,
-  },
-};
