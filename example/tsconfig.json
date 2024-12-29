@@ -1,0 +1,10 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "paths": {
+      "expo-apk-installer": ["../src/index"],
+      "expo-apk-installer/*": ["../src/*"]
+    }
+  }
+}
