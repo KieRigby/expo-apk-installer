@@ -1,6 +1,39 @@
 # expo-apk-installer
 
-Install APK files on android
+Install APK files on android.
+
+You must add the following into your `app.json` file to ensure the correct permissions and file providers are added to your android project:
+```json
+{
+    "expo": {
+        "plugins": [
+            "expo-apk-installer"
+        ],
+        ...
+    }
+}
+```
+
+Ensure the APK file to install is in the cache directory for your application. Here is some example code to download an apk from a URL using expo:
+
+```js
+import * as ApkInstaller from "expo-apk-installer";
+import * as FileSystem from "expo-file-system";
+
+const downloadAndInstallApk = async (url: string) => {
+    const downloadResumable = FileSystem.createDownloadResumable(
+      url,
+      FileSystem.cacheDirectory + "update.apk"
+    );
+
+    try {
+      const result = await downloadResumable.downloadAsync();
+      ApkInstaller.install (result?.uri);
+    } catch (error) {
+      console.error("Error downloading APK:", error);
+    }
+  };
+```
 
 # API documentation
 
