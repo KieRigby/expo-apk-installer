@@ -8,7 +8,7 @@ export default function App() {
 
     const downloadResumable = FileSystem.createDownloadResumable(
       url,
-      FileSystem.cacheDirectory + "movo-update.apk"
+      FileSystem.cacheDirectory + "update.apk"
     );
 
     try {
